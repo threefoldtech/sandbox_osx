@@ -190,9 +190,8 @@ def get_default_environment():
 
 
 def get_cached_default_environment():
-    var = os.environ.get('VIRTUAL_ENV')
     environment = _get_cached_default_environment()
-    if var and var != environment.path:
+    if environment.path != os.environ.get('VIRTUAL_ENV'):
         _get_cached_default_environment.clear_cache()
         return _get_cached_default_environment()
     return environment
