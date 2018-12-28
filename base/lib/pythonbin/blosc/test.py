@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 import sys
 import gc
@@ -5,18 +6,13 @@ import os
 from distutils.version import LooseVersion
 import ctypes
 import blosc
+import unittest
 
 # version number hack
 vi = sys.version_info
-PY26 = vi[0] == 2 and vi[1] == 6
 PY27 = vi[0] == 2 and vi[1] == 7
-PY33 = vi[0] == 3 and vi[1] == 3
 PY3X = vi[0] == 3
 
-if PY26:
-    import unittest2 as unittest
-else:
-    import unittest
 
 try:
     import numpy
@@ -88,10 +84,9 @@ class TestCodec(unittest.TestCase):
             # Python 3 no longer has the buffer
             self.assertEqual(expected, blosc.compress(
                 buffer(b'0123456789'), typesize=1))
-        if not PY26:
-            # memoryview doesn't exist on Python 2.6
-            self.assertEqual(expected, blosc.compress(
-                memoryview(b'0123456789'), typesize=1))
+        self.assertEqual(expected,
+                         blosc.compress(memoryview(b'0123456789'),
+                                        typesize=1))
 
         self.assertEqual(expected, blosc.compress(
             bytearray(b'0123456789'), typesize=1))
@@ -108,10 +103,7 @@ class TestCodec(unittest.TestCase):
         if not PY3X:
             # Python 3 no longer has the buffer
             self.assertEqual(expected, blosc.decompress(buffer(compressed)))
-        if not PY26:
-            # memoryview doesn't exist on Python 2.6
-            self.assertEqual(expected,
-                             blosc.decompress(memoryview(compressed)))
+        self.assertEqual(expected, blosc.decompress(memoryview(compressed)))
 
         self.assertEqual(expected, blosc.decompress(bytearray(compressed)))
         self.assertEqual(expected, blosc.decompress(np.array([compressed])))
@@ -127,10 +119,7 @@ class TestCodec(unittest.TestCase):
         if not PY3X:
             # Python 3 no longer has the buffer
             self.assertEqual(expected, blosc.decompress(buffer(compressed)))
-        if not PY26:
-            # memoryview doesn't exist on Python 2.6
-            self.assertEqual(expected,
-                             blosc.decompress(memoryview(compressed)))
+        self.assertEqual(expected, blosc.decompress(memoryview(compressed)))
 
         self.assertEqual(expected, blosc.decompress(bytearray(compressed)))
         self.assertEqual(expected, blosc.decompress(np.array([compressed])))
@@ -147,11 +136,9 @@ class TestCodec(unittest.TestCase):
             # Python 3 no longer has the buffer
             self.assertEqual(expected, blosc.decompress(buffer(compressed),
                                                         as_bytearray=True))
-        if not PY26:
-            # memoryview doesn't exist on Python 2.6
-            self.assertEqual(expected,
-                             blosc.decompress(memoryview(compressed),
-                                              as_bytearray=True))
+        self.assertEqual(expected,
+                         blosc.decompress(memoryview(compressed),
+                                          as_bytearray=True))
 
         self.assertEqual(expected, blosc.decompress(bytearray(compressed),
                                                     as_bytearray=True))
@@ -264,7 +251,7 @@ class TestCodec(unittest.TestCase):
     def test_unpack_array_with_from_py27_exceptions(self):
         self.assertRaises(UnicodeDecodeError, blosc.unpack_array, self.PY_27_INPUT)
 
-    @unittest.skipIf(not PY3X or PY33, "Only required when running Python3.x, excluding Python3.3")
+    @unittest.skipIf(not PY3X, "Only required when running Python3.x")
     def test_unpack_array_with_unicode_characters_from_py27(self):
         import numpy as np
         out_array = np.array(['å', 'ç', 'ø', 'π', '˚'])
